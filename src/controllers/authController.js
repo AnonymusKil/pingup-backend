@@ -4,8 +4,16 @@ import User from "../models/usermodel.js";
 
 async function registerUser(req, res) {
   try {
-    const { firstName, lastName, email, userName, password, dateOfBirth } = req.body;
-    if (!firstName || !lastName || !email || !userName || !password || !dateOfBirth) {
+    const { firstName, lastName, email, userName, password, dateOfBirth } =
+      req.body;
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !userName ||
+      !password ||
+      !dateOfBirth
+    ) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
@@ -46,7 +54,7 @@ async function registerUser(req, res) {
 async function loginUser(req, res) {
   try {
     const { usernameOrEmail, password } = req.body;
-  
+
     if (!usernameOrEmail || !password) {
       return res.status(400).json({
         success: false,
@@ -54,7 +62,6 @@ async function loginUser(req, res) {
       });
     }
     const user = await User.findOne({
-
       $or: [{ email: usernameOrEmail }, { userName: usernameOrEmail }],
     });
     if (!user) {
@@ -141,7 +148,7 @@ async function updateUserProfile(req, res) {
       }
       user.userName = userName;
     }
-    
+
     await user.save();
     return res.status(200).json({
       success: true,
@@ -156,15 +163,19 @@ async function updateUserProfile(req, res) {
     });
   }
 }
- 
-async function logoutUser(req, res){
-  try{
-    res.clearCookie("token");
+
+async function logoutUser(req, res) {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+    });
     return res.status(200).json({
       success: true,
       message: "Logout successful",
     });
-  }catch(error){
+  } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error logging out",
