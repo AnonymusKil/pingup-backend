@@ -97,7 +97,7 @@ async function loginUser(req, res) {
 async function getMe(req, res) {
   try {
     const userId = req.userInfo.userId;
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select("-password");
     if (!user) {
       return res.status(404).json({
         success: false,
