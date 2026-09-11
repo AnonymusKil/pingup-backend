@@ -120,7 +120,12 @@ async function unfollowUser(req, res) {
 async function getFollowers(req, res) {
   try {
     const userId = req.userInfo.userId;
-    const findUser = await userModel.findById(userId).populate("followers")
+    const findUser = await userModel
+      .findById(userId)
+      .populate({
+        path: "followers",
+        select: " _id firstName lastName userName profilePicture bio",
+      })
       .select("-password");
     if (!findUser) {
       return res.status(404).json({
@@ -146,10 +151,10 @@ async function getFollowers(req, res) {
 async function getFollowing(req, res) {
   try {
     const userId = req.userInfo.userId;
-    const findUser = await userModel
-      .findById(userId)
-      .populate("following")
-      .select("-password");
+    const findUser = await userModel.findById(userId).populate({
+      path: "following",
+      select: " _id firstName lastName userName profilePicture bio",
+    });
     if (!findUser) {
       return res.status(404).json({
         success: false,
