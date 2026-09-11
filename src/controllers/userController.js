@@ -120,7 +120,8 @@ async function unfollowUser(req, res) {
 async function getFollowers(req, res) {
   try {
     const userId = req.userInfo.userId;
-    const findUser = await userModel.findById(userId).populate("followers");
+    const findUser = await userModel.findById(userId).populate("followers")
+      .select("-password");
     if (!findUser) {
       return res.status(404).json({
         success: false,
