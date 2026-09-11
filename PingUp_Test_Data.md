@@ -23,7 +23,6 @@
         "_id": "6a9a25e923b88b2b0939c903",
         "firstName": "John",
         "lastName": "Doe",
-        "password": "$2b$10$E4DSSYcrPsccxoV2UfiyUOq.cfKk51mHQ28u3d7.PtWKrjG0MYyUW",
         "userName": "johndoe001",
         "email": "johndoe001@example.com",
         "dateOfBirth": "2003-05-15T00:00:00.000Z",
@@ -162,3 +161,20 @@
         "__v": 4
     }
 }
+
+
+/// User B
+
+{
+  "firstName": "Daniel",
+  "lastName": "Williams",
+  "userName": "daniel_williams",
+  "email": "daniel.williams@example.com",
+  "password": "Daniel@12345",
+  "dateOfBirth": "2004-11-22"
+}
+
+
+
+// routes
+http://localhost:3000/auth/users/6a9ab1fc6133a6fb9bb95934/follow

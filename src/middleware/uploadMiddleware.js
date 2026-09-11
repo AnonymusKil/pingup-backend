@@ -28,25 +28,48 @@ function fileFilter(req, file, cb) {
     cb(new Error("Only image files are allowed!"), false);
   }
 }
-
-
 function storyFileFilter(req, file, cb) {
+  console.log("MIME TYPE:", file.mimetype);
+  console.log("FILE NAME:", file.originalname);
+
+  const allowedExtensions = [
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".mov",
+    ".webm",
+    ".mp4",
+  ];
+
+  const fileExtension = path.extname(file.originalname).toLowerCase();
+
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "video/mp4",
+    "video/quicktime",
+    "video/webm",
+  ];
+
   if (
-    file.mimetype === "image/jpeg" ||
-    file.mimetype === "image/png" ||
-    file.mimetype === "image/webp" ||
-    file.mimetype === "video/mp4" ||
-    file.mimetype === "video/quicktime" ||
-    file.mimetype === "video/webm"
+    allowedMimeTypes.includes(file.mimetype) ||
+    (file.mimetype === "application/octet-stream" &&
+      allowedExtensions.includes(fileExtension))
   ) {
     cb(null, true);
   } else {
     cb(
-      new Error("Only JPEG, PNG, WebP, MP4, MOV, and WebM files are allowed."),
+      new Error(
+        "Only JPEG, PNG, WebP, MP4, MOV, and WebM files are allowed.",
+      ),
       false,
     );
   }
 }
+
+
 export const profilePicture = multer({
   storage: storage,
   fileFilter: fileFilter,

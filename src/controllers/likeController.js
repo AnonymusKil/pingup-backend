@@ -1,5 +1,6 @@
+import { getIO, getOnlineUsers } from "../helpers/socketHelper.js";
 import postModel from "../models/postmodel.js";
-
+import notificationModel from "../models/notificationModel.js";
 export async function likePost(req, res) {
   try {
     const postId = req.params.postId;
@@ -20,6 +21,22 @@ export async function likePost(req, res) {
     }
     getPost.likes.push(userId);
     await getPost.save();
+    if (getPost.author.toString() !== userId) {
+      const notification = await notificationModel.create({
+        sender: userId,
+        recipient: getPost.author,
+        type: "LIKE_POST",
+        postId,
+      });
+      const onlineUsers = getOnlineUsers();
+      const io = getIO();
+      const socketIds = onlineUsers.get(getPost.author.toString()); // Recipient may be offline
+      if (socketIds) {
+        socketIds.forEach((socketId) => {
+          io.to(socketId).emit("notification", notification);
+        });
+      }
+    }
     return res.status(200).json({
       success: true,
       message: "Post liked successfully",

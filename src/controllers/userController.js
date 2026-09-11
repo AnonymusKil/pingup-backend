@@ -1,5 +1,7 @@
-import userModel from "../models/usermodel";
-import postModel from "../models/postmodel";
+import { getIO, getOnlineUsers } from "../helpers/socketHelper.js";
+import notificationModel from "../models/notificationModel.js";
+import postModel from "../models/postmodel.js";
+import userModel from "../models/usermodel.js";
 async function followUser(req, res) {
   try {
     const userId = req.userInfo.userId;
@@ -38,6 +40,20 @@ async function followUser(req, res) {
 
     await findUser.save();
     await findTargetUserId.save();
+    const notification = await notificationModel.create({
+      sender: userId,
+      recipient: targetUserId,
+      type: "FOLLOW",
+    });
+
+    const onlineUsers = getOnlineUsers();
+    const io = getIO();
+    const socketIds = onlineUsers.get(targetUserId.toString()); // Recipient may be offline
+    if (socketIds) {
+      socketIds.forEach((socketId) => {
+        io.to(socketId).emit("notification", notification);
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -129,7 +145,10 @@ async function getFollowers(req, res) {
 async function getFollowing(req, res) {
   try {
     const userId = req.userInfo.userId;
-    const findUser = await userModel.findById(userId).populate("following");
+    const findUser = await userModel
+      .findById(userId)
+      .populate("following")
+      .select("-password");
     if (!findUser) {
       return res.status(404).json({
         success: false,
@@ -160,16 +179,18 @@ async function searchUsers(req, res) {
         message: "Search query can't be empty",
       });
     }
-    const users = await userModel.find({
-      $or: [
-        { userName: { $regex: searchQuery, $options: "i" } },
-        { firstName: { $regex: searchQuery, $options: "i" } },
-        { lastName: { $regex: searchQuery, $options: "i" } },
-      ],
-    });
+    const users = await userModel
+      .find({
+        $or: [
+          { userName: { $regex: searchQuery, $options: "i" } },
+          { firstName: { $regex: searchQuery, $options: "i" } },
+          { lastName: { $regex: searchQuery, $options: "i" } },
+        ],
+      })
+      .select("-password");
     res.status(200).json({
       success: true,
-      message: "s",
+      message: "Users retrieved successfully",
       users,
     });
   } catch (error) {
@@ -184,7 +205,13 @@ async function searchUsers(req, res) {
 async function getPendingConnections(req, res) {
   try {
     const userId = req.userInfo.userId;
-    const findUser = await userModel.findById(userId).populate("following");
+    const findUser = await userModel
+      .findById(userId)
+      .select("-password")
+      .populate({
+        path: "following",
+        select: "-password",
+      });
 
     if (!findUser) {
       return res.status(404).json({
@@ -219,7 +246,13 @@ async function getPendingConnections(req, res) {
 async function getConnections(req, res) {
   try {
     const userId = req.userInfo.userId;
-    const findUser = await userModel.findById(userId).populate("following");
+    const findUser = await userModel
+      .findById(userId)
+      .select("-password")
+      .populate({
+        path: "following",
+        select: "-password",
+      });
     if (!findUser) {
       return res.status(404).json({
         success: false,
@@ -251,7 +284,10 @@ async function getTimeline(req, res) {
   try {
     const userId = req.userInfo.userId;
 
-    const findUser = await userModel.findById(userId).populate("following");
+    const findUser = await userModel
+      .findById(userId)
+      .select("-password")
+      .populate("following");
     if (!findUser) {
       return res.status(404).json({
         success: false,
@@ -259,13 +295,39 @@ async function getTimeline(req, res) {
       });
     }
     const following = findUser.following;
-    const getFollowingPost = await postModel.find({
-      author: { $in: following },
-    }).sort({createdAt:-1});
+    const getFollowingPost = await postModel
+      .find({
+        author: { $in: following },
+      })
+      .sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       message: "Timeline retrieved successfully",
       getFollowingPost,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "An error occured",
+      error: error.message,
+    });
+  }
+}
+
+async function getUserById(req, res) {
+  try {
+    const getUser = req.params.userId;
+    const user = await userModel.findById(getUser).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "User  retrieved successfully",
+      user,
     });
   } catch (error) {
     res.status(500).json({
@@ -284,4 +346,5 @@ export {
   getPendingConnections,
   getConnections,
   getTimeline,
+  getUserById,
 };

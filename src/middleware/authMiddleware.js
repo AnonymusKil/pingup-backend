@@ -1,8 +1,7 @@
 import jsonWebToken from "jsonwebtoken";
 
-
 function authMiddleWare(req, res, next) {
-  try{
+  try {
     const token = req.cookies.token;
     if (!token) {
       return res.status(401).json({
@@ -11,10 +10,9 @@ function authMiddleWare(req, res, next) {
       });
     }
     const decodedToken = jsonWebToken.verify(token, process.env.JWT_SECRET_KEY);
-  req.userInfo = decodedToken;
+    req.userInfo = decodedToken;
     next();
-
-  }catch(error){
+  } catch (error) {
     return res.status(403).json({
       success: false,
       message: "Invalid or expired token. Please login again.",

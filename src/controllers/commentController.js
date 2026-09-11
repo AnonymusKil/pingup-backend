@@ -1,3 +1,5 @@
+import { getIO, getOnlineUsers } from "../helpers/socketHelper.js";
+import notificationModel from "../models/notificationModel.js";
 import postModel from "../models/postmodel.js";
 
 async function addCommentToPost(req, res) {
@@ -20,13 +22,30 @@ async function addCommentToPost(req, res) {
       });
     }
 
-    getPost.comments.push({
+    const newComment = getPost.comments.create({
       user: userId,
       content: content.trim(),
     });
 
+    getPost.comments.push(newComment);
+
     await getPost.save();
 
+    const notification = await notificationModel.create({
+      sender: userId,
+      recipient: getPost.author,
+      type: "COMMENT",
+      commentId: newComment._id,
+      postId,
+    });
+    const onlineUsers = getOnlineUsers();
+    const io = getIO();
+    const socketIds = onlineUsers.get(getPost.author.toString()); // Recipient may be offline
+    if (socketIds) {
+      socketIds.forEach((socketId) => {
+        io.to(socketId).emit("notification", notification);
+      });
+    }
     return res.status(201).json({
       success: true,
       message: "Comment added successfully",
@@ -35,7 +54,7 @@ async function addCommentToPost(req, res) {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error registering user",
+      message: "Unable to add comment",
       error: error.message,
     });
   }
@@ -155,13 +174,30 @@ async function likeComment(req, res) {
     }
     comment.likes.push(userId);
     await getPost.save();
-      return res
+    if (comment.user.toString() !== userId) {
+      const notification = await notificationModel.create({
+        sender: userId,
+        recipient: comment.user,
+        type: "LIKE_COMMENT",
+        commentId,
+        postId,
+      });
+      const onlineUsers = getOnlineUsers();
+      const io = getIO();
+      const socketIds = onlineUsers.get(comment.user.toString());
+      if (socketIds) {
+        socketIds.forEach((socketId) => {
+          io.to(socketId).emit("notification", notification);
+        });
+      }
+    }
+    return res
       .status(200)
       .json({ success: true, message: "Comment liked successfully" });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Error Deleting comment",
+      message: "Error liking comment",
       error: error.message,
     });
   }
@@ -181,14 +217,14 @@ async function unlikeComment(req, res) {
     }
     const comment = getPost.comments.id(commentId);
     if (!comment) {
-     return res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: "comment Not Found",
       });
     }
     const alreadyLiked = comment.likes.some((id) => id.toString() === userId);
     if (!alreadyLiked) {
-     return res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: "You have not like comment",
       });

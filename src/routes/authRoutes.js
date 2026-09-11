@@ -17,10 +17,22 @@ import {
 import authMiddleware from "../middleware/authMiddleware.js";
 import uploadCoverPicture from "../controllers/coverPictureController.js";
 import uploadProfilePicture from "../controllers/profilePictureController.js";
+import {
+  followUser,
+  unfollowUser,
+  getFollowers,
+  getFollowing,
+  searchUsers,
+  getPendingConnections,
+  getConnections,
+  getTimeline,
+  getUserById,
+} from "../controllers/userController.js";
 import { uploadPostPicture } from "../controllers/postImageController.js";
 import {
   profilePicture,
   coverPicture,
+  storyMedia,
 } from "../middleware/uploadMiddleware.js";
 import { likePost, unLike } from "../controllers/likeController.js";
 import {
@@ -35,6 +47,8 @@ import {
   createStory,
   getStory,
   getMyStory,
+  viewStory,
+  getStoryViewers,
 } from "../controllers/storyController.js";
 router.post("/register", registerUser);
 router.post("/login", loginUser);
@@ -89,8 +103,26 @@ router.delete(
   unlikeComment,
 );
 router.get("/posts/:postId/comments", authMiddleware, getPostComments);
-router.post("/stories", authMiddleware, createStory);
+router.post(
+  "/stories",
+  authMiddleware,
+  storyMedia.fields([
+    { name: "images", maxCount: 10 },
+    { name: "videos", maxCount: 10 },
+  ]),
+  createStory,
+);
 router.get("/stories", authMiddleware, getStory);
 router.get("/my-stories", authMiddleware, getMyStory);
-
+router.get("/stories/:storyId", authMiddleware, viewStory);
+router.get("/stories/:storyId/views", authMiddleware, getStoryViewers);
+router.post("/users/:userId/follow", authMiddleware, followUser);
+router.delete("/users/:userId/follow", authMiddleware, unfollowUser);
+router.get("/users/followers", authMiddleware, getFollowers);
+router.get("/users/following", authMiddleware, getFollowing);
+router.get("/users/search", authMiddleware, searchUsers);
+router.get("/users/pending-connections", authMiddleware, getPendingConnections);
+router.get("/users/connections", authMiddleware, getConnections);
+router.get("/users/timeline", authMiddleware, getTimeline);
+router.get("/users/:userId", authMiddleware, getUserById);
 export default router;
