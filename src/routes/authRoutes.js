@@ -9,7 +9,8 @@ import {
 } from "../controllers/authController.js";
 import {
   createPost,
-  getAllPost,
+  getMyPosts,
+  getUserPosts,
   getPostById,
   updatePost,
   deletePost,
@@ -61,7 +62,8 @@ router.post(
   profilePicture.array("postPicture", 10),
   createPost,
 );
-router.get("/posts", authMiddleware, getAllPost);
+router.get("/users/me/posts", authMiddleware, getMyPosts);
+router.get("/users/:userId/posts", authMiddleware, getUserPosts);
 router.get("/post/:postId", authMiddleware, getPostById);
 router.put("/posts/updatePost/:postId", authMiddleware, updatePost);
 router.delete("/post/:postId", authMiddleware, deletePost);

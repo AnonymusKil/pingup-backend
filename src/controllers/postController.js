@@ -1,13 +1,13 @@
 import postModel from "../models/postmodel.js";
 import postPictureToCloudinary from "../helpers/postImageHelper.js";
-
+import userModel from "../models/usermodel.js";
 import cloudinary from "../config/cloudinary.js";
 
 async function createPost(req, res) {
   try {
     const { content } = req.body;
     const imageFiles = req.files;
-    if (!content && imageFiles.length === 0 || !content && !imageFiles) {
+    if ((!content && imageFiles.length === 0) || (!content && !imageFiles)) {
       return res.status(400).json({
         success: false,
         message: "Post must contain text or an image",
@@ -21,14 +21,12 @@ async function createPost(req, res) {
           return { url, publicId };
         }),
       );
-
     }
-
     const userId = req.userInfo.userId;
     const newPost = new postModel({
       author: userId,
       content,
-      image: uploadedImages , 
+      image: uploadedImages,
     });
     await newPost.save();
     return res.status(201).json({
@@ -44,12 +42,44 @@ async function createPost(req, res) {
   }
 }
 
-async function getAllPost(req, res) {
+async function getMyPosts(req, res) {
   try {
-    const posts = await postModel.find();
+    const userId = req.userInfo.userId;
+    const findUser = await userModel.findById(userId);
+    if (!findUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Current user not found",
+      });
+    }
+    const posts = await postModel.find({ author: userId });
     res.status(200).json({
       success: true,
-      message: "getting post success",
+      message: "User posts retrieved successfully",
+      posts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Unable to retrieve posts",
+      error: error.message,
+    });
+  }
+}
+async function getUserPosts(req, res) {
+  try {
+    const getUser = req.params.userId;
+    const user = await userModel.findById(getUser).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const posts = await postModel.find({ author: getUser });
+     res.status(200).json({
+      success: true,
+      message: "User posts retrieved successfully",
       posts,
     });
   } catch (error) {
@@ -154,4 +184,4 @@ async function deletePost(req, res) {
   }
 }
 
-export { createPost, getAllPost, getPostById, updatePost, deletePost };
+export { createPost, getMyPosts, getPostById, updatePost, deletePost, getUserPosts };
