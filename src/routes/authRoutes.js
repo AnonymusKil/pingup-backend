@@ -14,6 +14,10 @@ import {
   getPostById,
   updatePost,
   deletePost,
+  getMyLikedPosts,
+  getUserLikedPosts,
+  getMyMedia,
+  getUserMedia,
 } from "../controllers/postController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import uploadCoverPicture from "../controllers/coverPictureController.js";
@@ -51,6 +55,13 @@ import {
   viewStory,
   getStoryViewers,
 } from "../controllers/storyController.js";
+import {
+  getMyNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+  deleteAllNotifications,
+} from "../controllers/notificationController.js";
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/logout", authMiddleware, logoutUser);
@@ -64,6 +75,10 @@ router.post(
 );
 router.get("/users/me/posts", authMiddleware, getMyPosts);
 router.get("/users/:userId/posts", authMiddleware, getUserPosts);
+router.get("/users/me/media", authMiddleware, getMyMedia);
+router.get("/users/:userId/media", authMiddleware, getUserMedia);
+router.get("/users/me/likepost", authMiddleware, getMyLikedPosts);
+router.get("/users/:userId/likepost", authMiddleware, getUserLikedPosts);
 router.get("/post/:postId", authMiddleware, getPostById);
 router.put("/posts/updatePost/:postId", authMiddleware, updatePost);
 router.delete("/post/:postId", authMiddleware, deletePost);
@@ -127,4 +142,29 @@ router.get("/users/pending-connections", authMiddleware, getPendingConnections);
 router.get("/users/connections", authMiddleware, getConnections);
 router.get("/users/timeline", authMiddleware, getTimeline);
 router.get("/users/:userId", authMiddleware, getUserById);
+
+router.get("/notifications", authMiddleware, getMyNotifications);
+
+router.patch(
+  "/notifications/:notificationId/read",
+  authMiddleware,
+  markNotificationAsRead,
+);
+
+router.patch(
+  "/notifications/read-all",
+  authMiddleware,
+  markAllNotificationsAsRead,
+);
+router.delete(
+  "/notifications/delete-all",
+  authMiddleware,
+  deleteAllNotifications,
+);
+router.delete(
+  "/notifications/:notificationId",
+  authMiddleware,
+  deleteNotification,
+);
+
 export default router;

@@ -77,7 +77,7 @@ async function getUserPosts(req, res) {
       });
     }
     const posts = await postModel.find({ author: getUser });
-     res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "User posts retrieved successfully",
       posts,
@@ -86,6 +86,107 @@ async function getUserPosts(req, res) {
     res.status(500).json({
       success: false,
       message: "Unable to retrieve posts",
+      error: error.message,
+    });
+  }
+}
+
+async function getMyMedia(req, res) {
+  try {
+    const getUser = req.userInfo.userId;
+    const user = await userModel.findById(getUser).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const posts = await postModel.find({ author: getUser });
+    const media = posts.flatMap((post) => post.image);
+    res.status(200).json({
+      success: true,
+      message: "Media retrieved successfully",
+      media,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Unable to retrieve media",
+      error: error.message,
+    });
+  }
+}
+
+async function getUserMedia(req, res) {
+  try {
+    const getUser = req.params.userId;
+    const user = await userModel.findById(getUser).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const posts = await postModel.find({ author: getUser });
+    const media = posts.flatMap((post) => post.image);
+    res.status(200).json({
+      success: true,
+      message: "Media retrieved successfully",
+      media,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Unable to retrieve media",
+      error: error.message,
+    });
+  }
+}
+async function getMyLikedPosts(req, res) {
+  try {
+    const getUser = req.userInfo.userId;
+    const user = await userModel.findById(getUser).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const posts = await postModel.find({ likes: getUser });
+    res.status(200).json({
+      success: true,
+      message: "Liked posts retrieved successfully",
+      posts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Unable to retrieve liked posts",
+      error: error.message,
+    });
+  }
+}
+
+async function getUserLikedPosts(req, res) {
+  try {
+    const getUser = req.params.userId;
+    const user = await userModel.findById(getUser).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const posts = await postModel.find({ likes: getUser });
+    res.status(200).json({
+      success: true,
+      message: "Liked posts retrieved successfully",
+      posts,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Unable to retrieve liked posts",
       error: error.message,
     });
   }
@@ -184,4 +285,15 @@ async function deletePost(req, res) {
   }
 }
 
-export { createPost, getMyPosts, getPostById, updatePost, deletePost, getUserPosts };
+export {
+  createPost,
+  getMyPosts,
+  getPostById,
+  updatePost,
+  deletePost,
+  getUserPosts,
+  getMyMedia,
+  getUserMedia,
+  getMyLikedPosts,
+  getUserLikedPosts,
+};
