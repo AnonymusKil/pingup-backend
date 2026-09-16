@@ -4,6 +4,7 @@ import userModel from "../models/usermodel.js";
 import cloudinary from "../config/cloudinary.js";
 
 async function createPost(req, res) {
+  console.log("CREATE POST CONTROLLER HIT");
   try {
     const { content } = req.body;
     const imageFiles = req.files || [];
@@ -15,6 +16,7 @@ async function createPost(req, res) {
     }
     let uploadedImages = [];
     if (imageFiles.length > 0) {
+      console.log(req.files);
       uploadedImages = await Promise.all(
         imageFiles.map(async (file) => {
           const { url, publicId } = await postPictureToCloudinary(file.path);
