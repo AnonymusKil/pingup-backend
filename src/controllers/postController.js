@@ -1,3 +1,4 @@
+import fs from "fs";
 import postModel from "../models/postmodel.js";
 import postPictureToCloudinary from "../helpers/postImageHelper.js";
 import userModel from "../models/usermodel.js";
@@ -8,6 +9,10 @@ async function createPost(req, res) {
   try {
     const { content } = req.body;
     const imageFiles = req.files || [];
+
+    console.log("FILES:", imageFiles);
+    console.log("FILE PATH:", imageFiles?.[0]?.path);
+    console.log("FILE EXISTS:", fs.existsSync(imageFiles?.[0]?.path))
     if ((!content && imageFiles.length === 0)) {
       return res.status(400).json({
         success: false,
