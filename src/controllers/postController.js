@@ -11,7 +11,7 @@ async function createPost(req, res) {
     const imageFiles = req.files || [];
     console.log(imageFiles[0]);
 
-    if ((!content && imageFiles.length === 0)) {
+    if (!content && imageFiles.length === 0) {
       return res.status(400).json({
         success: false,
         message: "Post must contain text or an image",
@@ -57,10 +57,13 @@ async function getMyPosts(req, res) {
         message: "Current user not found",
       });
     }
-    const posts = await postModel.find({ author: userId }).populate({
-      path: "author",
-      select: "_id firstName lastName userName profilePicture bio",
-    });
+    const posts = await postModel
+      .find({ author: userId })
+      .populate({
+        path: "author",
+        select: "_id firstName lastName userName profilePicture bio",
+      })
+      .sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       message: "User posts retrieved successfully",
@@ -84,10 +87,13 @@ async function getUserPosts(req, res) {
         message: "User not found",
       });
     }
-    const posts = await postModel.find({ author: getUser }).populate({
-      path: "author",
-      select: "_id firstName lastName userName profilePicture bio",
-    });
+    const posts = await postModel
+      .find({ author: getUser })
+      .populate({
+        path: "author",
+        select: "_id firstName lastName userName profilePicture bio",
+      })
+      .sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       message: "User posts retrieved successfully",
@@ -116,12 +122,14 @@ async function getMyMedia(req, res) {
       path: "author",
       select: "_id firstName lastName userName profilePicture bio",
     });
-    const media = posts.flatMap((post) =>
-      post.image.map((image) => ({
-        ...image.toObject(),
-        author: post.author,
-      })),
-    );
+    const media = posts
+      .flatMap((post) =>
+        post.image.map((image) => ({
+          ...image.toObject(),
+          author: post.author,
+        })),
+      )
+      .sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       message: "Media retrieved successfully",
@@ -150,12 +158,14 @@ async function getUserMedia(req, res) {
       path: "author",
       select: "_id firstName lastName userName profilePicture bio",
     });
-    const media = posts.flatMap((post) =>
-      post.image.map((image) => ({
-        ...image.toObject(),
-        author: post.author,
-      })),
-    );
+    const media = posts
+      .flatMap((post) =>
+        post.image.map((image) => ({
+          ...image.toObject(),
+          author: post.author,
+        })),
+      )
+      .sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       message: "Media retrieved successfully",
@@ -182,7 +192,7 @@ async function getMyLikedPosts(req, res) {
     const posts = await postModel.find({ likes: getUser }).populate({
       path: "author",
       select: "_id firstName lastName userName profilePicture bio",
-    });
+    })  .sort({ createdAt: -1 });;
     res.status(200).json({
       success: true,
       message: "Liked posts retrieved successfully",
@@ -210,7 +220,7 @@ async function getUserLikedPosts(req, res) {
     const posts = await postModel.find({ likes: getUser }).populate({
       path: "author",
       select: "_id firstName lastName userName profilePicture bio",
-    });
+    })  .sort({ createdAt: -1 });;
     res.status(200).json({
       success: true,
       message: "Liked posts retrieved successfully",
