@@ -1,15 +1,27 @@
 import cloudinary from "../config/cloudinary.js";
 
-async function uploadStoryMediaToCloudinary(filePath) {
-  try {
-    const uploadResult = await cloudinary.uploader.upload(filePath, {
-        resource_type: "auto", // This allows Cloudinary to handle both images and videos
-    });
-    return { url: uploadResult.secure_url, publicId: uploadResult.public_id };
-  } catch (error) {
-    console.error("Error uploading media to Cloudinary:", error);
-    throw error;
-  }
+function uploadStoryMediaToCloudinary(buffer) {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: "auto",
+      },
+      (error, result) => {
+        if (error) {
+          console.error("Error uploading media to Cloudinary:", error);
+          reject(error);
+          return;
+        }
+
+        resolve({
+          url: result.secure_url,
+          publicId: result.public_id,
+        });
+      },
+    );
+
+    uploadStream.end(buffer);
+  });
 }
 
 export default uploadStoryMediaToCloudinary;

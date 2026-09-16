@@ -9,10 +9,8 @@ async function createPost(req, res) {
   try {
     const { content } = req.body;
     const imageFiles = req.files || [];
+    console.log(imageFiles[0]);
 
-    console.log("FILES:", imageFiles);
-    console.log("FILE PATH:", imageFiles?.[0]?.path);
-    console.log("FILE EXISTS:", fs.existsSync(imageFiles?.[0]?.path))
     if ((!content && imageFiles.length === 0)) {
       return res.status(400).json({
         success: false,
@@ -24,7 +22,7 @@ async function createPost(req, res) {
       console.log(req.files);
       uploadedImages = await Promise.all(
         imageFiles.map(async (file) => {
-          const { url, publicId } = await postPictureToCloudinary(file.path);
+          const { url, publicId } = await postPictureToCloudinary(file.buffer);
           return { url, publicId };
         }),
       );

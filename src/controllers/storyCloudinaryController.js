@@ -33,7 +33,7 @@ export async function uploadStoryMedia(req, res) {
     }
     const uploadedMedia = await Promise.all(
       req.files.map(async (file) => {
-        const { url, publicId } = await uploadStoryMediaToCloudinary(file.path);
+        const { url, publicId } = await uploadStoryMediaToCloudinary(file.buffer);
 
         if (file.mimetype.startsWith("image/")) {
           story.images.push({ url, publicId });

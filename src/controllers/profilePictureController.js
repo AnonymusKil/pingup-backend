@@ -26,7 +26,7 @@ export async function uploadProfilePicture(req, res) {
     const oldPublicId = user.profilePicture?.publicId;
 
     const { url, publicId } = await uploadProfilePictureToCloudinary(
-      req.file.path,
+      req.file.buffer,
     );
 
     user.profilePicture = { url, publicId };

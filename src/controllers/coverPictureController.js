@@ -26,7 +26,7 @@ export async function uploadCoverPicture(req, res) {
     const oldPublicId = user.coverPicture?.publicId;
 
     const { url, publicId } = await uploadCoverPictureToCloudinary(
-      req.file.path,
+      req.file.buffer,
     );
 
     user.coverPicture = { url, publicId };

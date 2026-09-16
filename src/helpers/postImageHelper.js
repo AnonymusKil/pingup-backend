@@ -1,15 +1,25 @@
 import cloudinary from "../config/cloudinary.js";
-async function postPictureToCloudinary(filePath) {
-  try {
-    const uploadResult = await cloudinary.uploader.upload(filePath, {});
-    return {
-      url: uploadResult.secure_url,
-      publicId: uploadResult.public_id,
-    };
-  } catch (error) {
-    console.log("Error Uploading To Cloudinary", error);
-    throw new Error("Error Uploading To Cloudinary");
-  }
+
+function postPictureToCloudinary(buffer) {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {},
+      (error, result) => {
+        if (error) {
+          console.log("Error Uploading To Cloudinary:", error);
+          reject(error);
+          return;
+        }
+
+        resolve({
+          url: result.secure_url,
+          publicId: result.public_id,
+        });
+      },
+    );
+
+    uploadStream.end(buffer);
+  });
 }
 
 export default postPictureToCloudinary;
