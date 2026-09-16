@@ -6,8 +6,8 @@ import cloudinary from "../config/cloudinary.js";
 async function createPost(req, res) {
   try {
     const { content } = req.body;
-    const imageFiles = req.files;
-    if ((!content && imageFiles.length === 0) || (!content && !imageFiles)) {
+    const imageFiles = req.files || [];
+    if ((!content && imageFiles.length === 0)) {
       return res.status(400).json({
         success: false,
         message: "Post must contain text or an image",
