@@ -101,7 +101,10 @@ async function getMyMedia(req, res) {
         message: "User not found",
       });
     }
-    const posts = await postModel.find({ author: getUser });
+    const posts = await postModel.find({ author: getUser }).populate({
+      path: "author",
+      select: "_id firstName lastName userName profilePicture bio",
+    });
     const media = posts.flatMap((post) => post.image);
     res.status(200).json({
       success: true,
@@ -127,7 +130,10 @@ async function getUserMedia(req, res) {
         message: "User not found",
       });
     }
-    const posts = await postModel.find({ author: getUser });
+    const posts = await postModel.find({ likes: getUser }).populate({
+      path: "author",
+      select: "_id firstName lastName userName profilePicture bio",
+    });
     const media = posts.flatMap((post) => post.image);
     res.status(200).json({
       success: true,
@@ -152,7 +158,7 @@ async function getMyLikedPosts(req, res) {
         message: "User not found",
       });
     }
-    const posts = await postModel.find({ likes: getUser });
+    const posts = await postModel.find({ likes: getUser }).populate("author");
     res.status(200).json({
       success: true,
       message: "Liked posts retrieved successfully",
