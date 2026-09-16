@@ -52,7 +52,10 @@ async function getMyPosts(req, res) {
         message: "Current user not found",
       });
     }
-    const posts = await postModel.find({ author: userId });
+    const posts = await postModel.find({ author: userId }).populate({
+      path: "author",
+      select: "_id firstName lastName userName profilePicture bio",
+    });
     res.status(200).json({
       success: true,
       message: "User posts retrieved successfully",
@@ -76,7 +79,10 @@ async function getUserPosts(req, res) {
         message: "User not found",
       });
     }
-    const posts = await postModel.find({ author: getUser });
+    const posts = await postModel.find({ author: getUser }).populate({
+      path: "author",
+      select: "_id firstName lastName userName profilePicture bio",
+    });
     res.status(200).json({
       success: true,
       message: "User posts retrieved successfully",
