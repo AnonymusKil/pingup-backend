@@ -158,7 +158,10 @@ async function getMyLikedPosts(req, res) {
         message: "User not found",
       });
     }
-    const posts = await postModel.find({ likes: getUser }).populate("author");
+    const posts = await postModel.find({ likes: getUser }).populate({
+      path: "author",
+      select: "_id firstName lastName userName profilePicture bio",
+    });
     res.status(200).json({
       success: true,
       message: "Liked posts retrieved successfully",
@@ -183,7 +186,10 @@ async function getUserLikedPosts(req, res) {
         message: "User not found",
       });
     }
-    const posts = await postModel.find({ likes: getUser });
+    const posts = await postModel.find({ likes: getUser }).populate({
+      path: "author",
+      select: "_id firstName lastName userName profilePicture bio",
+    });
     res.status(200).json({
       success: true,
       message: "Liked posts retrieved successfully",
