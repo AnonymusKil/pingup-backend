@@ -293,7 +293,6 @@ async function getTimeline(req, res) {
     const findUser = await userModel
       .findById(userId)
       .select("-password")
-      .populate("following");
     if (!findUser) {
       return res.status(404).json({
         success: false,
@@ -304,6 +303,10 @@ async function getTimeline(req, res) {
     const getFollowingPost = await postModel
       .find({
         author: { $in: following },
+      })
+      .populate({
+        path: "author",
+        select: "_id firstName lastName userName profilePicture bio",
       })
       .sort({ createdAt: -1 });
     res.status(200).json({
