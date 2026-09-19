@@ -16,7 +16,7 @@ async function createStory(req, res) {
     if (imageFiles.length > 0) {
       uploadedImages = await Promise.all(
         imageFiles.map(async (file) => {
-          const { url, publicId } = await postStoryMediaToCloudinary(file.path);
+          const { url, publicId } = await postStoryMediaToCloudinary(file.buffer);
           return { url, publicId };
         }),
       );
@@ -25,7 +25,7 @@ async function createStory(req, res) {
     if (videoFiles.length > 0) {
       uploadedVideos = await Promise.all(
         videoFiles.map(async (file) => {
-          const { url, publicId } = await postStoryMediaToCloudinary(file.path);
+          const { url, publicId } = await postStoryMediaToCloudinary(file.buffer);
           return { url, publicId };
         }),
       );
