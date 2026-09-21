@@ -141,9 +141,8 @@ router.get("/users/search", authMiddleware, searchUsers);
 router.get("/users/pending-connections", authMiddleware, getPendingConnections);
 router.get("/users/connections", authMiddleware, getConnections);
 router.get("/users/timeline", authMiddleware, getTimeline);
-router.get("/users/:userId", authMiddleware, getUserById);
-
 router.get("/notifications", authMiddleware, getMyNotifications);
+router.get("/users/:userId", authMiddleware, getUserById);
 
 router.patch(
   "/notifications/:notificationId/read",
