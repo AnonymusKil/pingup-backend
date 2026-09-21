@@ -4,8 +4,10 @@ import userModel from "../models/usermodel.js";
 async function getMyNotifications(req, res) {
   try {
     const getUser = req.userInfo.userId;
+    console.log("REQ USER INFO:", req.userInfo);
 
     const user = await userModel.findById(getUser).select("-password");
+    console.log(user)
 
     if (!user) {
       return res.status(404).json({
