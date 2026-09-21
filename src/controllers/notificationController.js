@@ -7,7 +7,7 @@ async function getMyNotifications(req, res) {
     console.log("REQ USER INFO:", req.userInfo);
 
     const user = await userModel.findById(getUser).select("-password");
-    console.log(user)
+    console.log(user);
 
     if (!user) {
       return res.status(404).json({
@@ -16,9 +16,14 @@ async function getMyNotifications(req, res) {
       });
     }
 
-    const notifications = await notificationModel.find({
-      recipient: getUser,
-    });
+    const notifications = await notificationModel
+      .find({
+        recipient: getUser,
+      })
+      .populate({
+        path: "sender",
+        select: "_id firstName lastName userName profilePicture",
+      });
 
     return res.status(200).json({
       success: true,
@@ -46,7 +51,7 @@ async function markNotificationAsRead(req, res) {
     }
     getNotifitication.read = true;
     await getNotifitication.save();
-    
+
     return res.status(200).json({
       success: true,
       message: " notification marked as read",
@@ -158,5 +163,5 @@ export {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotification,
-   deleteAllNotifications
+  deleteAllNotifications,
 };
