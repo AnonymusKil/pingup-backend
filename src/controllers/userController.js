@@ -290,9 +290,7 @@ async function getTimeline(req, res) {
   try {
     const userId = req.userInfo.userId;
 
-    const findUser = await userModel
-      .findById(userId)
-      .select("-password")
+    const findUser = await userModel.findById(userId).select("-password");
     if (!findUser) {
       return res.status(404).json({
         success: false,

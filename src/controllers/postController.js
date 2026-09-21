@@ -245,7 +245,10 @@ async function getUserLikedPosts(req, res) {
 async function getPostById(req, res) {
   try {
     const postId = req.params.postId;
-    const post = await postModel.findById(postId);
+    const post = await postModel.findById(postId).populate({
+      path: "author",
+      select: "_id firstName lastName userName profilePicture bio",
+    });
     if (!post) {
       return res.status(404).json({
         success: false,
