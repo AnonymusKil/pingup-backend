@@ -228,10 +228,7 @@ async function getUserLikedPosts(req, res) {
         path: "author",
         select: "_id firstName lastName userName profilePicture bio",
       })
-      .populate({
-        path: "comments.user",
-        select: "_id firstName lastName userName profilePicture bio",
-      })
+      
       .sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
@@ -249,10 +246,16 @@ async function getUserLikedPosts(req, res) {
 async function getPostById(req, res) {
   try {
     const postId = req.params.postId;
-    const post = await postModel.findById(postId).populate({
-      path: "author",
-      select: "_id firstName lastName userName profilePicture bio",
-    });
+    const post = await postModel
+      .findById(postId)
+      .populate({
+        path: "author",
+        select: "_id firstName lastName userName profilePicture bio",
+      })
+      .populate({
+        path: "comments.user",
+        select: "_id firstName lastName userName profilePicture bio",
+      });
     if (!post) {
       return res.status(404).json({
         success: false,
