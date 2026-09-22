@@ -228,6 +228,10 @@ async function getUserLikedPosts(req, res) {
         path: "author",
         select: "_id firstName lastName userName profilePicture bio",
       })
+      .populate({
+        path: "comments.user",
+        select: "_id firstName lastName userName profilePicture bio",
+      })
       .sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
